@@ -1892,8 +1892,8 @@ function buildSoukeiRequest() {
     if (c.soukei === "ari") return true;
     return stMap[c.id] !== "fuyou";
   });
-  // 全角で「Ｒキャスト名　送迎先」
-  const lines = targets.map(c => "Ｒ" + toZen(c.name) + "　" + toZen(c.soukeiPlace || ""));
+  // 全角で「Ｍキャスト名　送迎先」
+  const lines = targets.map(c => "Ｍ" + toZen(c.name) + "　" + toZen(c.soukeiPlace || ""));
   $("soukeiReqText").value = lines.join("\n");
   $("soukeiReqCount").textContent = targets.length + "名";
   dlgOpen("soukeiReqDlg");
