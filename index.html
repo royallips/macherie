@@ -6,15 +6,17 @@
 <title>マシェリ利用管理</title>
 <style>
   :root{
-    --pink:#e8457a; --pink-soft:#fff0f5; --pink-mid:#ffe0ee;
-    --ink:#2e2026; --ink-soft:#7a5e6b; --line:#ecd3de;
+    /* マシェリ配色：ロイヤル（ピンク系）と被らないよう藤色・紫系（バイオレット）に変更。
+       変数名は --pink のままだが、他300箇所以上から参照されているため名前は変更していない。 */
+    --pink:#5c4db4; --pink-soft:#f3f1fb; --pink-mid:#e6e1f7;
+    --ink:#241f33; --ink-soft:#6e6580; --line:#ddd6f0;
     --over:#e0463c; --over-bg:#fde0de;
     --hiru:#fff3d6; --hiru-bar:#f5b942;
     --yoru:#dceaf8; --yoru-bar:#5b9bd5;
     --bar:#7bc4a4; --bar2:#62b894;
     --lend:#b07cd8; --borrow:#4a9fd4;
     --seiri:#f6c6cf; --shukuhaku:#bfe3b0; --yotei:#fde9b0; --tenpaku:#aaccef; --mitei:#e8e2ec;
-    --bg:#fff8fb;
+    --bg:#faf9fd;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;padding:14px}
