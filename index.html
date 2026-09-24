@@ -1715,8 +1715,8 @@ function renderRooms() {
     const rLocked = isRoomLocked(roomDay, ri);
     roomRows += `<div class="rt-row"><div class="rt-room${rLocked ? ' room-locked' : ''}" data-ri="${ri}" onclick="toggleRoomLock(${ri})">${roomLabel(ri)}${rLocked ? '<span class="room-lock-icon">🔒</span>' : ''}</div><div class="rt-track${rLocked ? ' room-locked-track' : ''}" data-ri="${ri}">${barsHtml(rooms[ri])}</div></div>`;
   }
-  // 溢れ行：デフォルト2行。使用中の行が埋まったら常に空き行を1つ追加で確保
-  const overRowCount = Math.max(2, overRooms.length + 1);
+  // 溢れ行：デフォルト4行。使用中の行が埋まったら常に空き行を1つ追加で確保
+  const overRowCount = Math.max(4, overRooms.length + 1);
   let rtOvNo = 0;
   for (let i = 0; i < overRowCount; i++) {
     const arr = overRooms[i] || [];
@@ -2375,7 +2375,11 @@ function renderRoomsList() {
       const rno = allBorrow ? "借" : (++ovNo);
       roomRows += `<div class="lf-row over"><div class="lf-rno" style="background:var(--over-bg);color:var(--over)">${rno}</div><div class="lf-track" data-ri="OVER" data-day="${d}" data-overrow="${overRowIdx}">${bars}</div></div>`;
     });
-    roomRows += `<div class="lf-row over"><div class="lf-rno" style="background:var(--over-bg);color:var(--over)">${ovNo === 0 ? '溢' : ''}</div><div class="lf-track" data-ri="OVER" data-day="${d}" data-overrow="${(overRooms || []).length}"></div></div>`;
+    // 空きの溢れ行：デフォルト3行（従来の1行から2行増やした）
+    for (let j = 0; j < 3; j++) {
+      const label = (ovNo === 0 && j === 0) ? '溢' : '';
+      roomRows += `<div class="lf-row over"><div class="lf-rno" style="background:var(--over-bg);color:var(--over)">${label}</div><div class="lf-track" data-ri="OVER" data-day="${d}" data-overrow="${(overRooms || []).length + j}"></div></div>`;
+    }
 
     const wd = new Date(y, m, d).getDay(), wkcls = wd === 0 ? "sun" : wd === 6 ? "sat" : "";
     const isToday = d === todayD;
