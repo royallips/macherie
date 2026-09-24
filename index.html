@@ -94,7 +94,7 @@
   .lf-dayhead .lf-over{margin-left:auto;background:var(--over);color:#fff;border-radius:10px;padding:2px 10px;font-size:15px}
   .lf-dayhead .lf-freesum{margin-left:auto;color:#2d7a4a;font-size:16px;font-weight:800}
   .lf-dayhead .lf-over+.lf-freesum{margin-left:6px}
-  .lf-axis{display:grid;grid-template-columns:24px repeat(16,1fr);font-size:12px;color:var(--ink-soft);border-bottom:1px solid var(--line)}
+  .lf-axis{display:grid;grid-template-columns:24px repeat(17,1fr);font-size:12px;color:var(--ink-soft);border-bottom:1px solid var(--line)}
   .lf-axis span{border-left:1px solid var(--line);height:20px;padding-left:2px;display:flex;align-items:center;gap:2px}
   .lf-axis-free{display:inline-block;min-width:10px;text-align:center;border-radius:3px;font-size:7px;font-weight:800;line-height:11px;padding:0 1px}
   .lf-row{display:grid;grid-template-columns:24px 1fr;align-items:stretch;border-bottom:1px solid #f3e6ee;min-height:34px}
@@ -104,14 +104,14 @@
   .lf-row.over .lf-bar{height:26px;top:1px}
   .lf-rno{font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;background:#faf3f7;border-right:1px solid var(--line);color:var(--ink-soft)}
   .lf-track{position:relative;height:34px;background:#eceef1}
-  .lf-track::after{content:"";position:absolute;top:0;bottom:0;left:56.25%;width:3px;background:#9aa3ad;opacity:.7;z-index:0;pointer-events:none}
+  .lf-track::after{content:"";position:absolute;top:0;bottom:0;left:58.82%;width:3px;background:#9aa3ad;opacity:.7;z-index:0;pointer-events:none}
   .lf-axis span.border17{border-left:3px solid #9aa3ad}
-  .lf-dn{display:grid;grid-template-columns:24px 9fr 7fr;margin:3px 0}
+  .lf-dn{display:grid;grid-template-columns:24px 10fr 7fr;margin:3px 0}
   #view-roomslist .panel{padding:6px;margin-bottom:0}
   #view-roomslist .lf-rno{display:none}
   #view-roomslist .lf-row{grid-template-columns:1fr}
-  #view-roomslist .lf-axis{grid-template-columns:0 repeat(16,1fr)}
-  #view-roomslist .lf-dn{grid-template-columns:0 9fr 7fr}
+  #view-roomslist .lf-axis{grid-template-columns:0 repeat(17,1fr)}
+  #view-roomslist .lf-dn{grid-template-columns:0 10fr 7fr}
   .lf-dn .lf-dn-h,.lf-dn .lf-dn-y{font-size:12px;font-weight:800;text-align:center;border-radius:5px;padding:2px 0}
   .lf-dn .lf-dn-h{background:#fff1d6;color:#d98a00;margin:0 2px 0 0}
   .lf-dn .lf-dn-y{background:#e4e8ff;color:#4a55c0;margin:0 0 0 2px}
@@ -247,10 +247,10 @@
   .sb-memo{width:100%;height:100%;border:none;resize:none;font-size:12px;font-family:inherit;background:transparent;outline:none;padding:0;box-sizing:border-box;color:var(--ink)}
   .rt{min-width:820px}
   .rt-axis{display:grid;grid-template-columns:54px 1fr;margin-bottom:2px}
-  .rt-axis .ax{display:grid;grid-template-columns:repeat(16,1fr);font-size:14px;font-weight:700;color:var(--ink-soft)}
+  .rt-axis .ax{display:grid;grid-template-columns:repeat(17,1fr);font-size:14px;font-weight:700;color:var(--ink-soft)}
   .rt-axis .ax span{border-left:1px solid var(--line);padding-left:3px;height:20px}
   .rt-axis .ax span.border17{border-left:3px solid #9aa3ad}
-  .dn-band{display:grid;grid-template-columns:repeat(16,1fr);gap:0;margin-bottom:2px}
+  .dn-band{display:grid;grid-template-columns:repeat(17,1fr);gap:0;margin-bottom:2px}
   .dn-hiru,.dn-yoru{font-size:11px;font-weight:800;text-align:center;border-radius:6px;padding:2px 0;white-space:nowrap;overflow:hidden}
   .dn-hiru{background:#fff1d6;color:#d98a00;margin-right:2px}
   .dn-yoru{background:#e4e8ff;color:#4a55c0;margin-left:2px}
@@ -265,7 +265,7 @@
   .rt-row.over .rt-track{background:#e8e8e8}
   .rt-row.firstover{border-top:3px solid var(--over)}
   .rt-track{position:relative;min-height:38px;background:#eceef1}
-  .rt-track::after{content:"";position:absolute;top:0;bottom:0;left:56.25%;width:3px;background:#9aa3ad; opacity:.7; z-index:0; pointer-events:none}
+  .rt-track::after{content:"";position:absolute;top:0;bottom:0;left:58.82%;width:3px;background:#9aa3ad; opacity:.7; z-index:0; pointer-events:none}
   .rt-bar{position:absolute;height:34px;border-radius:7px;border:2px solid #222;color:#222;font-size:15px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2);padding:0 5px;top:2px;line-height:1.1;background:#fff}
   .rt-bar.rank-premier{border-color:#2f6fd0}
   .rt-bar.rank-vip{border-color:#f5c800}
@@ -340,7 +340,7 @@
   .memo-box{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:8px;font-size:13px;font-family:inherit;resize:vertical;margin-top:12px}
   .freebar{display:grid;grid-template-columns:54px 1fr;align-items:center;margin-top:8px}
   .freebar .fl{font-size:10px;font-weight:700;color:var(--ink-soft);text-align:center}
-  .freebar .ft{display:grid;grid-template-columns:repeat(16,1fr);height:26px;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+  .freebar .ft{display:grid;grid-template-columns:repeat(17,1fr);height:26px;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
   .freebar .fc{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;border-left:1px solid rgba(255,255,255,.6)}
 
   dialog{border:none;border-radius:18px;padding:0;box-shadow:0 20px 60px rgba(180,60,110,.3);max-width:440px;width:92%}
@@ -532,9 +532,9 @@
     .lf-row.over .lf-bar{height:20px}
     /* リスピラ一覧の日ブロック：スマホは1日が画面にほぼ収まる幅 */
     .lf-day{width:92vw;max-width:480px}
-    .lf-axis{grid-template-columns:22px repeat(16,1fr)}
+    .lf-axis{grid-template-columns:22px repeat(17,1fr)}
     .lf-row{grid-template-columns:22px 1fr;min-height:28px}
-    #view-roomslist .lf-axis{grid-template-columns:0 repeat(16,1fr)}
+    #view-roomslist .lf-axis{grid-template-columns:0 repeat(17,1fr)}
     .lf-axis span{font-size:10px}
     .lf-axis-free{font-size:6px;min-width:8px;line-height:9px}
     /* ダイアログ：下からせり出すシート風に。画面幅に収める */
@@ -1692,7 +1692,7 @@ function renderRooms() {
 
   let axis = "";
   for (let h = OPEN; h < CLOSE; h++) axis += `<span class="${h === 17 ? 'border17' : ''}">${h}</span>`;
-  const dnLabel = `<div class="dn-band"><div class="dn-hiru" style="grid-column:1 / 10">昼の部</div><div class="dn-yoru" style="grid-column:10 / 17">夜の部</div></div>`;
+  const dnLabel = `<div class="dn-band"><div class="dn-hiru" style="grid-column:1 / 11">昼の部</div><div class="dn-yoru" style="grid-column:11 / 18">夜の部</div></div>`;
 
   // 部屋内バー（名前の下に利用時間を表示）
   function barsHtml(arr) {
