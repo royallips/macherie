@@ -763,6 +763,9 @@
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:6px">
       <input type="checkbox" id="castMat" style="width:auto"> マット対応</label>
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:6px">
+      <input type="checkbox" id="castInbound" style="width:auto"> インバウンド対応</label>
+    <div class="field" id="castInboundCondField" style="margin-top:8px;display:none"><label>インバウンド対応条件</label><input id="castInboundCond" placeholder="例 英語のみ対応可"></div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:6px">
       <input type="checkbox" id="castAutoOver" style="width:auto"> 不安定</label>
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:6px">
       <input type="checkbox" id="castFuryo" style="width:auto"> 不良</label>
@@ -1556,6 +1559,11 @@ function renderStats() {
   // マット対応一覧：宿泊一覧の右に並べて表示
   const matCasts = state.casts.filter(c => c.mat).sort(byName);
   const matHtml = listOrNone(matCasts, "");
+  // インバウンド対応一覧：対応条件も合わせて表示
+  const inboundCasts = state.casts.filter(c => c.inbound).sort(byName);
+  const inboundRowsHtml = inboundCasts.length
+    ? inboundCasts.map(c => `<div class="stat-row" style="padding:4px 2px;font-size:13px"><span class="names" style="margin:0">${nameSpan(c, "")}</span><b style="font-size:12px;color:var(--ink-soft);font-weight:700">${c.inboundCond ? esc(c.inboundCond) : ""}</b></div>`).join("")
+    : `<div class="hint">対象なし</div>`;
 
   // 集計カードは全部まとめてPCで横一列に並べる
   const statCardList = [];
@@ -1579,6 +1587,9 @@ function renderStats() {
   statCardList.push(`<div class="card list"><div class="lbl">マット対応一覧</div>
        <div class="cnt">${matCasts.length}<span style="font-size:11px;color:var(--ink-soft)"> / ${state.casts.length}名</span></div>
        <div class="names" style="margin-top:2px">${matHtml}</div></div>`);
+  statCardList.push(`<div class="card list"><div class="lbl">インバウンド対応一覧</div>
+       <div class="cnt">${inboundCasts.length}<span style="font-size:11px;color:var(--ink-soft)"> / ${state.casts.length}名</span></div>
+       <div style="margin-top:2px">${inboundRowsHtml}</div></div>`);
 
   const manageActive = document.querySelector('.tab[data-tab="manage"]')?.classList.contains("active");
   $("statCards").style.display = manageActive ? "" : "none";
@@ -3069,6 +3080,8 @@ function openCastDlg(cid) {
     $("castName").value = c.name; castGroup = c.group; castRank = c.rank || "";
     $("castBousui").checked = !!c.bousui;
     $("castMat").checked = !!c.mat;
+    $("castInbound").checked = !!c.inbound;
+    $("castInboundCond").value = c.inboundCond || "";
     $("castAutoOver").checked = !!c.autoOver;
     $("castSoukeiAri").checked = c.soukei === "ari";
     $("castSoukeiKakunin").checked = c.soukei === "kakunin";
@@ -3082,10 +3095,13 @@ function openCastDlg(cid) {
     $("castSoukeiPlace").value = "";
     $("castBousui").checked = false;
     $("castMat").checked = false;
+    $("castInbound").checked = false;
+    $("castInboundCond").value = "";
     $("castFuryo").checked = false;
     $("castDelete").style.display = "none";
   }
   refreshSoukeiPlace();
+  refreshInboundCond();
   refreshCastSeg();
   refreshRankSeg();
   dlgOpen("castDlg");
@@ -3096,6 +3112,11 @@ function refreshSoukeiPlace() {
   const on = $("castSoukeiAri").checked || $("castSoukeiKakunin").checked;
   $("castSoukeiPlaceField").style.display = on ? "block" : "none";
 }
+// インバウンド対応条件欄は、インバウンド対応にチェックが入っている時のみ表示
+function refreshInboundCond() {
+  $("castInboundCondField").style.display = $("castInbound").checked ? "block" : "none";
+}
+$("castInbound").onchange = refreshInboundCond;
 // 送迎チェックは片方のみ
 $("castSoukeiAri").onchange = () => { if ($("castSoukeiAri").checked) $("castSoukeiKakunin").checked = false; refreshSoukeiPlace(); };
 $("castSoukeiKakunin").onchange = () => { if ($("castSoukeiKakunin").checked) $("castSoukeiAri").checked = false; refreshSoukeiPlace(); };
@@ -3122,14 +3143,16 @@ $("castSave").onclick = () => {
   const furyo = $("castFuryo").checked;
   const bousui = $("castBousui").checked;
   const mat = $("castMat").checked;
+  const inbound = $("castInbound").checked;
+  const inboundCond = inbound ? val("castInboundCond") : "";
   const soukei = $("castSoukeiAri").checked ? "ari" : ($("castSoukeiKakunin").checked ? "kakunin" : "");
   const soukeiPlace = soukei ? val("castSoukeiPlace") : "";
   const now = Date.now();
   if (editCastId) {
     const c = state.casts.find(x => x.id === editCastId);
-    if (c) { c.name = n; c.group = castGroup; c.autoOver = ao; c.soukei = soukei; c.soukeiPlace = soukeiPlace; c.furyo = furyo; c.bousui = bousui; c.mat = mat; c.rank = castRank; c._updatedAt = now; }
+    if (c) { c.name = n; c.group = castGroup; c.autoOver = ao; c.soukei = soukei; c.soukeiPlace = soukeiPlace; c.furyo = furyo; c.bousui = bousui; c.mat = mat; c.inbound = inbound; c.inboundCond = inboundCond; c.rank = castRank; c._updatedAt = now; }
   } else {
-    state.casts.push({ id: id(), name: n, group: castGroup, availDates: "", canAsk: "", canAsk2: "", autoOver: ao, soukei: soukei, soukeiPlace: soukeiPlace, furyo: furyo, bousui: bousui, mat: mat, rank: castRank, _updatedAt: now });
+    state.casts.push({ id: id(), name: n, group: castGroup, availDates: "", canAsk: "", canAsk2: "", autoOver: ao, soukei: soukei, soukeiPlace: soukeiPlace, furyo: furyo, bousui: bousui, mat: mat, inbound: inbound, inboundCond: inboundCond, rank: castRank, _updatedAt: now });
   }
   save(); dlgClose("castDlg"); renderAll();
 };
