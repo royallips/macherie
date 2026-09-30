@@ -433,7 +433,6 @@
   .sh-name small{font-size:.78em;color:var(--ink-soft);margin-left:1px;font-weight:600}
   .sh-name.over{color:var(--over)}
   .sh-vip{font-size:8px;font-weight:900;color:#8a6a00;background:#fbf1d2;border:1px solid #f5c800;border-radius:3px;padding:0 3px;margin-left:2px;vertical-align:middle;line-height:1.3}
-  .sh-bousui{font-size:8px;font-weight:900;color:#1565c0;background:#e3f2fd;border:1px solid #90caf9;border-radius:3px;padding:0 3px;margin-left:2px;vertical-align:middle;line-height:1.3}
   .sh-badge-stack{display:inline-flex;flex-direction:column;gap:1px;vertical-align:middle;margin-left:2px}
   .view-toggle-btn{font-size:11px;padding:4px 10px;border-radius:8px;border:1.5px solid var(--pink);background:#fff;color:var(--pink);cursor:pointer;font-weight:700}
   .view-toggle-btn.active{background:var(--pink);color:#fff}
@@ -632,7 +631,6 @@
     .sh-side-r-only { margin-left: auto; flex: 1; text-align: right; }
     .sh-name { font-size: 20pt; font-weight: 900; display: inline; white-space: nowrap; color: #000; line-height: 1; }
     .sh-vip { font-size: 6pt; font-weight: 900; color: #8a6a00; background: #fbf1d2 !important; border: 0.5pt solid #f5c800; border-radius: 2pt; padding: 0 2pt; margin-left: 0; vertical-align: middle; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .sh-bousui { font-size: 6pt; font-weight: 900; color: #1565c0; background: #e3f2fd !important; border: 0.5pt solid #90caf9; border-radius: 2pt; padding: 0 2pt; margin-left: 0; vertical-align: middle; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .sh-badge-stack { display: inline-flex; flex-direction: column; gap: 0.3pt; vertical-align: middle; margin-left: 1pt; }
     .sh-name+.sh-name { margin-left: 3pt; }
     .sh-name small { font-size: .75em; font-weight: 700; color: #333; margin-left: 1pt; }
@@ -758,8 +756,6 @@
     <div class="field"><label>ランク</label>
       <!-- 内部値は premier/vip のままだが、マシェリでは 割引なし/プレミア として表示（CSSクラス名・badgeロジックは共通のため据え置き） -->
       <div class="seg" id="castRankSeg"><button data-r="">スタンダード</button><button data-r="premier">割引なし</button><button data-r="vip">プレミア</button></div></div>
-    <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:6px">
-      <input type="checkbox" id="castBousui" style="width:auto"> 防水シート</label>
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:6px">
       <input type="checkbox" id="castMat" style="width:auto"> マット対応</label>
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:6px">
@@ -1614,10 +1610,7 @@ function buildRoomsSheet(memo) {
   }
   function badgeStack(w) {
     const c = state.casts.find(x => x.id === w.cid);
-    const v = c && c.rank === "vip" ? `<span class="sh-vip">プレミア</span>` : "";
-    const b = c && c.bousui ? `<span class="sh-bousui">防水</span>` : "";
-    if (v && b) return `<span class="sh-badge-stack">${v}${b}</span>`;
-    return v + b;
+    return c && c.rank === "vip" ? `<span class="sh-vip">プレミア</span>` : "";
   }
   function nameTagH(w, over) {
     const t = fmtHiru(w.sp);
@@ -3084,7 +3077,6 @@ function openCastDlg(cid) {
     if (!c) return;
     $("castDlgTitle").textContent = "キャスト編集";
     $("castName").value = c.name; castGroup = c.group; castRank = c.rank || "";
-    $("castBousui").checked = !!c.bousui;
     $("castMat").checked = !!c.mat;
     $("castInbound").checked = !!c.inbound;
     $("castInboundCond").value = c.inboundCond || "";
@@ -3099,7 +3091,6 @@ function openCastDlg(cid) {
     castGroup = "hiru"; castRank = ""; $("castName").value = ""; $("castAutoOver").checked = false;
     $("castSoukeiAri").checked = false; $("castSoukeiKakunin").checked = false;
     $("castSoukeiPlace").value = "";
-    $("castBousui").checked = false;
     $("castMat").checked = false;
     $("castInbound").checked = false;
     $("castInboundCond").value = "";
@@ -3147,7 +3138,6 @@ $("castSave").onclick = () => {
   if (!n) { alert("名前を入力してください"); return; }
   const ao = $("castAutoOver").checked;
   const furyo = $("castFuryo").checked;
-  const bousui = $("castBousui").checked;
   const mat = $("castMat").checked;
   const inbound = $("castInbound").checked;
   const inboundCond = inbound ? val("castInboundCond") : "";
@@ -3156,9 +3146,9 @@ $("castSave").onclick = () => {
   const now = Date.now();
   if (editCastId) {
     const c = state.casts.find(x => x.id === editCastId);
-    if (c) { c.name = n; c.group = castGroup; c.autoOver = ao; c.soukei = soukei; c.soukeiPlace = soukeiPlace; c.furyo = furyo; c.bousui = bousui; c.mat = mat; c.inbound = inbound; c.inboundCond = inboundCond; c.rank = castRank; c._updatedAt = now; }
+    if (c) { c.name = n; c.group = castGroup; c.autoOver = ao; c.soukei = soukei; c.soukeiPlace = soukeiPlace; c.furyo = furyo; c.mat = mat; c.inbound = inbound; c.inboundCond = inboundCond; c.rank = castRank; c._updatedAt = now; }
   } else {
-    state.casts.push({ id: id(), name: n, group: castGroup, availDates: "", canAsk: "", canAsk2: "", autoOver: ao, soukei: soukei, soukeiPlace: soukeiPlace, furyo: furyo, bousui: bousui, mat: mat, inbound: inbound, inboundCond: inboundCond, rank: castRank, _updatedAt: now });
+    state.casts.push({ id: id(), name: n, group: castGroup, availDates: "", canAsk: "", canAsk2: "", autoOver: ao, soukei: soukei, soukeiPlace: soukeiPlace, furyo: furyo, mat: mat, inbound: inbound, inboundCond: inboundCond, rank: castRank, _updatedAt: now });
   }
   save(); dlgClose("castDlg"); renderAll();
 };
