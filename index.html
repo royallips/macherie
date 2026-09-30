@@ -1561,9 +1561,9 @@ function renderStats() {
   const matHtml = listOrNone(matCasts, "");
   // インバウンド対応一覧：名前をクリックすると対応条件を表示
   const inboundCasts = state.casts.filter(c => c.inbound).sort(byName);
-  const inboundRowsHtml = inboundCasts.length
-    ? inboundCasts.map(c => `<div class="stat-row" style="padding:4px 2px;font-size:13px;cursor:pointer" onclick="showInboundCond('${c.id}')"><span class="names" style="margin:0"><span class="nm ${c.group}">${esc(c.name)}</span></span></div>`).join("")
-    : `<div class="hint">対象なし</div>`;
+  const inboundHtml = inboundCasts.length
+    ? inboundCasts.map(c => `<span class="nm ${c.group}" style="cursor:pointer" onclick="showInboundCond('${c.id}')">${esc(c.name)}</span>`).join("")
+    : `<span class="none">対象なし</span>`;
 
   // 集計カードは全部まとめてPCで横一列に並べる
   const statCardList = [];
@@ -1589,7 +1589,7 @@ function renderStats() {
        <div class="names" style="margin-top:2px">${matHtml}</div></div>`);
   statCardList.push(`<div class="card list"><div class="lbl">インバウンド対応一覧</div>
        <div class="cnt">${inboundCasts.length}<span style="font-size:11px;color:var(--ink-soft)"> / ${state.casts.length}名</span></div>
-       <div style="margin-top:2px">${inboundRowsHtml}</div></div>`);
+       <div class="names" style="margin-top:2px">${inboundHtml}</div></div>`);
 
   const manageActive = document.querySelector('.tab[data-tab="manage"]')?.classList.contains("active");
   $("statCards").style.display = manageActive ? "" : "none";
