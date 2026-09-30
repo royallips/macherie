@@ -1562,7 +1562,7 @@ function renderStats() {
   // インバウンド対応一覧：名前をクリックすると対応条件を表示
   const inboundCasts = state.casts.filter(c => c.inbound).sort(byName);
   const inboundRowsHtml = inboundCasts.length
-    ? inboundCasts.map(c => `<div class="stat-row" style="padding:4px 2px;font-size:13px;cursor:pointer" onclick="showInboundCond('${c.id}')"><span class="names" style="margin:0"><span class="nm ${c.group}">${esc(c.name)}</span></span><span style="font-size:11px;color:var(--ink-soft)">条件を見る ›</span></div>`).join("")
+    ? inboundCasts.map(c => `<div class="stat-row" style="padding:4px 2px;font-size:13px;cursor:pointer" onclick="showInboundCond('${c.id}')"><span class="names" style="margin:0"><span class="nm ${c.group}">${esc(c.name)}</span></span></div>`).join("")
     : `<div class="hint">対象なし</div>`;
 
   // 集計カードは全部まとめてPCで横一列に並べる
