@@ -1559,10 +1559,10 @@ function renderStats() {
   // マット対応一覧：宿泊一覧の右に並べて表示
   const matCasts = state.casts.filter(c => c.mat).sort(byName);
   const matHtml = listOrNone(matCasts, "");
-  // インバウンド対応一覧：対応条件も合わせて表示
+  // インバウンド対応一覧：名前をクリックすると対応条件を表示
   const inboundCasts = state.casts.filter(c => c.inbound).sort(byName);
   const inboundRowsHtml = inboundCasts.length
-    ? inboundCasts.map(c => `<div class="stat-row" style="padding:4px 2px;font-size:13px"><span class="names" style="margin:0">${nameSpan(c, "")}</span><b style="font-size:12px;color:var(--ink-soft);font-weight:700">${c.inboundCond ? esc(c.inboundCond) : ""}</b></div>`).join("")
+    ? inboundCasts.map(c => `<div class="stat-row" style="padding:4px 2px;font-size:13px;cursor:pointer" onclick="showInboundCond('${c.id}')"><span class="names" style="margin:0"><span class="nm ${c.group}">${esc(c.name)}</span></span><span style="font-size:11px;color:var(--ink-soft)">条件を見る ›</span></div>`).join("")
     : `<div class="hint">対象なし</div>`;
 
   // 集計カードは全部まとめてPCで横一列に並べる
@@ -2506,6 +2506,12 @@ function searchCastInCalendar(name) {
   renderCalendar();
   syncStatCards();
   scrollToTabs();
+}
+// インバウンド対応一覧：キャストをクリックすると対応条件を表示
+function showInboundCond(cid) {
+  const c = state.casts.find(x => x.id === cid);
+  if (!c) return;
+  alert(`${c.name}\nインバウンド対応条件：\n${c.inboundCond || "（未入力）"}`);
 }
 function jumpToListDay(d) {
   roomsListScrollTarget = d;
@@ -3658,7 +3664,7 @@ window.openDlg = openDlg; window.changeRoomDay = changeRoomDay; window.openMove 
 window.assignRoom = assignRoom; window.openStat = openStat; window.openEvent = openEvent;
 window.toggleRoomLock = toggleRoomLock;
 window.setAvail = setAvail; window.cycleAsk = cycleAsk; window.openLend = openLend; window.cycleSoukei = cycleSoukei; window.setLendType = setLendType;
-window.removeLend = removeLend; window.jumpToDay = jumpToDay; window.jumpToListDay = jumpToListDay; window.jumpToListDate = jumpToListDate; window.searchCastInCalendar = searchCastInCalendar; window.editAskLabel = editAskLabel;
+window.removeLend = removeLend; window.jumpToDay = jumpToDay; window.jumpToListDay = jumpToListDay; window.jumpToListDate = jumpToListDate; window.searchCastInCalendar = searchCastInCalendar; window.editAskLabel = editAskLabel; window.showInboundCond = showInboundCond;
 window.optimizeRooms = optimizeRooms; window.openCastDlg = openCastDlg;
 window.jumpToShukuhakuFromManage = jumpToShukuhakuFromManage;
 window.openRanking = openRanking;
