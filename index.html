@@ -642,6 +642,34 @@
     .sheet-memo-row .memo-box { display: block !important; width: 100%; font-size: 8pt; border: 1pt solid #bbb !important; padding: 2pt 4pt; box-sizing: border-box; resize: none; height: 16mm; }
     .sheet-extra { display: none !important; }
   }
+  .pimg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px}
+  .pimg{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+  .pimg-thumb{position:relative;width:100%;aspect-ratio:595/842;border-radius:8px;overflow:hidden;background:#f3e8ee;border:1.5px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:18px;cursor:pointer}
+  .pimg-thumb.has{border-style:solid}
+  .pimg-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .pimg-thumb.busy::after{content:"…";position:absolute;inset:0;background:rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--pink)}
+  .pimg-label{font-size:10px;font-weight:700;color:var(--ink-soft);white-space:nowrap}
+  .inb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0 16px;max-width:760px}
+  .inb-row{display:flex;align-items:baseline;gap:10px;padding:7px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+  .inb-row:hover{background:var(--pink-soft)}
+  .inb-name{font-weight:800;font-size:14px;white-space:nowrap}
+  .inb-memo{font-size:12px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .top-grid{grid-template-columns:repeat(auto-fill,minmax(84px,1fr));max-width:720px}
+  .top-grid .pimg-thumb{aspect-ratio:9/16}
+  .pimg-del{font-size:10px;border:none;background:none;color:#c0392b;padding:0;cursor:pointer;min-height:14px}
+  .pimg-thumb.off img{opacity:.3}
+  #topImgGrid.editing .pimg-thumb.has{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+  #topImgGrid .pimg.dragging,#castImgGrid .pimg.dragging{opacity:.85;z-index:5;position:relative;pointer-events:none}
+  #topImgGrid .pimg.drop-target .pimg-thumb,#castImgGrid .pimg.drop-target .pimg-thumb{outline:3px solid var(--pink);outline-offset:1px}
+  #castInbGrid .pimg.dragging{opacity:.85;z-index:5;position:relative;pointer-events:none}
+  #castInbGrid .pimg.drop-target .pimg-thumb{outline:3px solid var(--pink);outline-offset:1px}
+  #castInbGrid.editing .pimg-thumb,#castImgGrid.editing .pimg-thumb{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+  .pimg-thumb.off::before{content:"非表示";position:absolute;z-index:1;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;white-space:nowrap}
+  .pimg-btns{display:flex;gap:8px;align-items:center}
+  .pimg-vis{font-size:10px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:6px;padding:1px 6px;cursor:pointer}
+  .pimg-vis.on{border-color:#2d8a4a;color:#2d8a4a}
+
 </style>
 </head>
 <body>
@@ -765,6 +793,18 @@
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:6px">
       <input type="checkbox" id="castInbound" style="width:auto"> インバウンド対応</label>
     <div class="field" id="castInboundCondField" style="margin-top:8px;display:none"><label>インバウンド対応条件</label><input id="castInboundCond" placeholder="例 英語のみ対応可"></div>
+    <div style="margin-top:12px;font-size:12px;font-weight:700;color:var(--ink-soft)">パネル画像(A4サイズ)</div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:4px">
+      <input type="checkbox" id="castHidePanel" style="width:auto"> 非表示</label>
+    <div class="hint" id="castImgHint" style="font-size:11px;margin-top:2px"></div>
+    <div id="castImgBar" style="display:flex;gap:8px;align-items:center;margin:2px 0 6px"></div>
+    <div class="pimg-grid" id="castImgGrid"></div>
+    <div id="castInbBox" style="display:none">
+      <div style="margin-top:6px;font-size:12px;font-weight:700;color:var(--ink-soft)">インバウンド画像</div>
+      <div id="castInbBar" style="display:flex;gap:8px;align-items:center;margin:2px 0 6px"></div>
+      <div class="pimg-grid" id="castInbGrid"></div>
+    </div>
+    <input type="file" id="castImgFile" accept="image/*" style="display:none">
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:6px">
       <input type="checkbox" id="castAutoOver" style="width:auto"> 不安定</label>
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:6px">
@@ -2982,8 +3022,16 @@ function renderManage() {
       <div class="sec-title"><span class="tag hiru">昼の部</span></div><div>${chips("hiru")}</div>
       <div class="sec-title" style="margin-top:14px"><span class="tag yoru">夜の部</span></div><div>${chips("yoru")}</div>
       <div style="margin-top:16px"><button class="btn" id="addCast2">＋ キャストを追加</button></div>
+    </div>
+    <div class="panel">
+      <div class="sec-title">パネルトップ画像</div>
+      <div class="hint" id="topImgHint" style="font-size:11px;margin-bottom:6px">画像サイズ9:16</div>
+      <div id="topImgBar" style="display:flex;gap:8px;align-items:center;margin-bottom:8px"></div>
+      <div class="pimg-grid top-grid" id="topImgGrid"></div>
+      <input type="file" id="topImgFile" accept="image/*" style="display:none">
     </div>`;
   $("addCast2").onclick = () => openCastDlg();
+  renderTopImages();
 }
 function renderSettings() {
   const ui = $("cloudUrlInput"); if (ui) ui.value = cloudUrl || "";
@@ -3097,6 +3145,7 @@ function openCastDlg(cid) {
     $("castMat").checked = !!c.mat;
     $("castInbound").checked = !!c.inbound;
     $("castInboundCond").value = c.inboundCond || "";
+    $("castHidePanel").checked = !!c.hidePanel;
     $("castAutoOver").checked = !!c.autoOver;
     $("castSoukeiAri").checked = c.soukei === "ari";
     $("castSoukeiKakunin").checked = c.soukei === "kakunin";
@@ -3111,6 +3160,7 @@ function openCastDlg(cid) {
     $("castMat").checked = false;
     $("castInbound").checked = false;
     $("castInboundCond").value = "";
+    $("castHidePanel").checked = false;
     $("castFuryo").checked = false;
     $("castDelete").style.display = "none";
   }
@@ -3118,6 +3168,8 @@ function openCastDlg(cid) {
   refreshInboundCond();
   refreshCastSeg();
   refreshRankSeg();
+  castImgName = editCastId ? (state.casts.find(x => x.id === editCastId) || {}).name || "" : "";
+  renderCastImages();
   dlgOpen("castDlg");
   setTimeout(() => $("castName").focus(), 50);
 }
@@ -3157,15 +3209,17 @@ $("castSave").onclick = () => {
   const furyo = $("castFuryo").checked;
   const mat = $("castMat").checked;
   const inbound = $("castInbound").checked;
+  const hidePanel = $("castHidePanel").checked;
   const inboundCond = inbound ? val("castInboundCond") : "";
   const soukei = $("castSoukeiAri").checked ? "ari" : ($("castSoukeiKakunin").checked ? "kakunin" : "");
   const soukeiPlace = soukei ? val("castSoukeiPlace") : "";
   const now = Date.now();
   if (editCastId) {
     const c = state.casts.find(x => x.id === editCastId);
-    if (c) { c.name = n; c.group = castGroup; c.autoOver = ao; c.soukei = soukei; c.soukeiPlace = soukeiPlace; c.furyo = furyo; c.mat = mat; c.inbound = inbound; c.inboundCond = inboundCond; c.rank = castRank; c._updatedAt = now; }
+    if (c && c.name !== n) renameCastImages(c.name, n);
+    if (c) { c.name = n; c.hidePanel = hidePanel; c.group = castGroup; c.autoOver = ao; c.soukei = soukei; c.soukeiPlace = soukeiPlace; c.furyo = furyo; c.mat = mat; c.inbound = inbound; c.inboundCond = inboundCond; c.rank = castRank; c._updatedAt = now; }
   } else {
-    state.casts.push({ id: id(), name: n, group: castGroup, availDates: "", canAsk: "", canAsk2: "", autoOver: ao, soukei: soukei, soukeiPlace: soukeiPlace, furyo: furyo, mat: mat, inbound: inbound, inboundCond: inboundCond, rank: castRank, _updatedAt: now });
+    state.casts.push({ id: id(), name: n, group: castGroup, availDates: "", canAsk: "", canAsk2: "", autoOver: ao, hidePanel: hidePanel, soukei: soukei, soukeiPlace: soukeiPlace, furyo: furyo, mat: mat, inbound: inbound, inboundCond: inboundCond, rank: castRank, _updatedAt: now });
   }
   save(); dlgClose("castDlg"); renderAll();
 };
@@ -3176,6 +3230,525 @@ $("castDelete").onclick = () => {
   openDelDlg(editCastId);
 };
 $("castName").addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
+
+/* ===== 12b. プロフィール画像（受付画面 royal-reception の img/源氏名*.jpg を直接読み書き） ===== */
+// 受付画面と同じ royallips.github.io なので、GitHub トークン（rr_gh_token）を共有する
+const IMG_REPO = "royallips/macherie-reception";
+const MAIN_SLOTS = [["", "メイン"], ["2", "2枚目"], ["3", "3枚目"]];
+const INB_SLOTS = [["A1", "メイン"], ["A2", "2枚目"]];
+const IMG_SLOTS = [...MAIN_SLOTS, ...INB_SLOTS];
+const GH_TOKEN_KEY = "rr_gh_token";
+let castImgName = "";          // ダイアログを開いた時点の源氏名（画像のファイル名）
+let castImgSlot = "";          // 選択中の枠
+function ghToken(ask) {
+  let t = "";
+  try { t = localStorage.getItem(GH_TOKEN_KEY) || ""; } catch (e) {}
+  if (!t && ask) {
+    t = (prompt("画像を保存するには GitHub のトークンが必要です（ghp_ で始まるもの）。\nこの端末に保存されます。") || "").trim();
+    if (t) try { localStorage.setItem(GH_TOKEN_KEY, t); } catch (e) {}
+  }
+  return t;
+}
+function ghHeaders() {
+  const h = { Accept: "application/vnd.github+json" };
+  const t = ghToken(false); if (t) h.Authorization = "token " + t;
+  return h;
+}
+function imgPath(name, suf) { return "img/" + encodeURIComponent(name.normalize("NFC") + suf + ".jpg"); }
+// 画像があるかは受付サイトの画像を直接読み込んで確かめる（GitHub API はトークンなしだと1時間60回で止まるため、
+// API は保存・削除のときだけトークン付きで使う）
+const IMG_SITE = "https://royallips.github.io/macherie-reception/";
+const imgBust = Date.now();   // 開いた時点の最新を読む（サイトのキャッシュ対策）
+const imgLocal = {};          // 保存・削除した直後の状態。サイト反映まで1分ほどかかるので、その間はこちらを表示（null=削除済み）
+function imgKey(name, suf) { return name.normalize("NFC") + suf + ".jpg"; }
+function probeImg(url) { return new Promise(r => { const im = new Image(); im.onload = () => r(true); im.onerror = () => r(false); im.src = url; }); }
+// トークンがある端末は GitHub の一覧（トークン付き・1時間5000回まで）で正確に確認する。
+// 受付サイトへの反映は1〜2分遅れるので、サイトだけで数えると直前に上げた画像を「ない」と判断して上書きしてしまう
+let ghList = null;   // ファイル名 → 表示用URL（null=一覧なし。受付サイトで確認する）
+async function refreshGhList() {
+  ghList = null;
+  if (!ghToken(false)) return;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${IMG_REPO}/contents/img?ref=main&_t=${Date.now()}`, { headers: ghHeaders(), cache: "no-store" });
+    if (!res.ok) return;
+    const map = {};
+    for (const f of await res.json()) map[f.name.normalize("NFC")] = f.download_url + "?v=" + f.sha;
+    ghList = map;
+  } catch (e) {}
+}
+async function imgState(name, suf) {
+  const k = imgKey(name, suf);
+  if (k in imgLocal) return imgLocal[k] ? { exists: true, src: imgLocal[k] } : { exists: false };
+  if (ghList) return ghList[k] ? { exists: true, src: ghList[k] } : { exists: false };
+  const u = IMG_SITE + imgPath(name, suf) + "?t=" + imgBust;
+  return (await probeImg(u)) ? { exists: true, src: u } : { exists: false };
+}
+// トークン付きで1ファイルだけ確認（無ければ null）
+async function ghFile(name, suf) {
+  const res = await fetch(`https://api.github.com/repos/${IMG_REPO}/contents/${imgPath(name, suf)}?ref=main&_t=${Date.now()}`, { headers: ghHeaders(), cache: "no-store" });
+  if (res.status === 404) return null;
+  if (res.status === 401) { try { localStorage.removeItem(GH_TOKEN_KEY); } catch (e) {} throw new Error("トークンが無効です。もう一度お試しください。"); }
+  if (!res.ok) throw new Error("GitHub の確認エラー（" + res.status + "）");
+  return await res.json();
+}
+async function renderCastImages() {
+  const grid = $("castImgGrid"), inbGrid = $("castInbGrid");
+  const name = castImgName;
+  refreshInbBox();
+  if (!editCastId || !name) {
+    grid.innerHTML = inbGrid.innerHTML = ""; $("castImgHint").textContent = "画像は、キャストを保存したあと「キャスト編集」から追加できます。";
+    return;
+  }
+  $("castImgHint").textContent = "";
+  const slotsHTML = (slots, st) => slots.map(([suf, label]) => {
+      const f = st && st[suf] && st[suf].exists ? st[suf] : null;
+      return `<div class="pimg"><div class="pimg-thumb ${f ? "has" : ""}" data-suf="${suf}">${f ? `<img src="${esc(f.src)}" alt="">` : (st ? "＋" : "…")}</div>
+        <div class="pimg-label">${label}</div>
+        <button class="pimg-del" data-del="${suf}" style="visibility:${f ? "visible" : "hidden"}">削除</button></div>`;
+  }).join("");
+  castOrder = null; $("castImgBar").innerHTML = $("castInbBar").innerHTML = "";
+  grid.classList.remove("editing"); inbGrid.classList.remove("editing");
+  const draw = st => {
+    if (castImgName !== name || castOrder) return;
+    grid.innerHTML = slotsHTML(MAIN_SLOTS, st);
+    inbGrid.innerHTML = slotsHTML(INB_SLOTS, st);
+    // 画像がある欄には「並びを変更」
+    for (const g of Object.values(CAST_ORDER_GROUPS)) {
+      const has = st && g.slots.some(([suf]) => st[suf].exists);
+      $(g.bar).innerHTML = has ? `<button class="btn ghost" data-order-start="${g.key}" style="padding:5px 12px;font-size:12px">並びを変更</button>` : "";
+    }
+    // 既にインバウンド画像があるキャストは、チェックを入れた状態で開く
+    if (st && INB_SLOTS.some(([suf]) => st[suf].exists) && !$("castInbound").checked) {
+      $("castInbound").checked = true; refreshInbBox();
+    }
+  };
+  draw(null);
+  await refreshGhList();
+  const st = {};
+  await Promise.all(IMG_SLOTS.map(async ([suf]) => { st[suf] = await imgState(name, suf); }));
+  draw(st);
+}
+// ===== パネル画像（メイン・2枚目・3枚目）とインバウンド画像（メイン・2枚目）の並べ替え：
+//       「並びを変更」→ ドラッグ（枠どうしを入れ替え）→「保存」 =====
+const CAST_ORDER_GROUPS = {
+  main: { key: "main", slots: MAIN_SLOTS, grid: "castImgGrid", bar: "castImgBar", title: "パネル画像" },
+  inb:  { key: "inb",  slots: INB_SLOTS,  grid: "castInbGrid", bar: "castInbBar", title: "インバウンド画像" },
+};
+let castOrder = null;   // { g: 欄, name, base: 開始時の各枠の画像SHA, order: 各枠に入れる元の枠番号, srcs }
+let castOrderBusy = false;
+const castFile = (name, suf) => name.normalize("NFC") + suf + ".jpg";
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-order-start]");
+  if (b) startCastOrder(CAST_ORDER_GROUPS[b.dataset.orderStart]);
+});
+async function startCastOrder(g) {
+  if (castOrder || castOrderBusy || !ghToken(true)) return;
+  castOrderBusy = true;
+  try {
+    const name = castImgName, snap = await readImgFiles();
+    const base = g.slots.map(([suf]) => snap.byName[castFile(name, suf)] || null);
+    castOrder = { g, name, base, order: g.slots.map((_, i) => i), srcs: base.map((sha, i) => sha ? rawImgUrl(snap.head, castFile(name, g.slots[i][0])) : null) };
+    // もう一方の欄の「並びを変更」は隠す（同時に2つは並べ替えない）
+    for (const o of Object.values(CAST_ORDER_GROUPS)) if (o !== g) $(o.bar).innerHTML = "";
+    drawCastOrder();
+  } catch (e) { alert("画像の読み込みに失敗しました。\n" + (e.message || e)); }
+  finally { castOrderBusy = false; }
+}
+function drawCastOrder() {
+  if (!castOrder) return;
+  const { g } = castOrder, grid = $(g.grid);
+  grid.classList.add("editing");
+  grid.innerHTML = castOrder.order.map((k, i) => {
+    const src = castOrder.srcs[k];
+    return `<div class="pimg" data-slotpos="${i}"><div class="pimg-thumb ${src ? "has" : ""}">${src ? `<img src="${esc(src)}" alt="" draggable="false">` : "空き"}</div>
+      <div class="pimg-label">${g.slots[i][1]}${src && k !== i ? `（元${g.slots[k][1]}）` : ""}</div></div>`;
+  }).join("");
+  $(g.bar).innerHTML = `<span style="font-size:11px;font-weight:700;color:var(--pink)">ドラッグで入れ替えて「保存」</span>
+    <button class="btn" id="castOrderSave" style="padding:5px 12px;font-size:12px">保存</button>
+    <button class="btn ghost" id="castOrderCancel" style="padding:5px 12px;font-size:12px">キャンセル</button>`;
+  $("castOrderSave").onclick = saveCastOrder;
+  $("castOrderCancel").onclick = () => { castOrder = null; renderCastImages(); };
+}
+async function saveCastOrder() {
+  if (!castOrder || castOrderBusy) return;
+  const { g, name, base, order } = castOrder;
+  if (order.every((k, i) => k === i)) { castOrder = null; renderCastImages(); return; }
+  if (!base[order[0]]) { alert(`${g.title}のメインの枠が空になります。メインに画像を入れてから保存してください。`); return; }
+  castOrderBusy = true; $(g.grid).style.opacity = ".5";
+  try {
+    const head = await commitImgFiles(snap => {
+      const cur = g.slots.map(([suf]) => snap.byName[castFile(name, suf)] || null);
+      if (cur.join() !== base.join()) throw new Error("並べ替えの間に画像が変更されました。もう一度「並びを変更」からやり直してください。");
+      return g.slots.map(([suf], i) => ({ file: castFile(name, suf), sha: base[order[i]] }));
+    }, `${g.title}の並べ替え: ${name}`);
+    // 受付サイトへの反映待ちの間も新しい並びで表示する
+    g.slots.forEach(([suf], i) => { imgLocal[imgKey(name, suf)] = base[order[i]] ? rawImgUrl(head, castFile(name, suf)) : null; });
+    castOrder = null;
+    await renderCastImages();
+  } catch (e) { alert("並べ替えの保存に失敗しました。\n" + (e.message || e)); }
+  finally { castOrderBusy = false; $(g.grid).style.opacity = ""; }
+}
+// ドラッグ（並べ替え中の欄だけ）。離した先の枠と入れ替える
+let castDrag = null, castDragJust = false;
+document.addEventListener("pointerdown", e => {
+  if (!castOrder || castOrderBusy) return;
+  const item = e.target.closest(`#${castOrder.g.grid}.editing .pimg[data-slotpos]`);
+  if (!item || !e.target.closest(".pimg-thumb.has")) return;
+  castDrag = { item, from: Number(item.dataset.slotpos), x: e.clientX, y: e.clientY, id: e.pointerId, started: false, target: null };
+});
+document.addEventListener("pointermove", e => {
+  if (!castDrag || e.pointerId !== castDrag.id) return;
+  const dx = e.clientX - castDrag.x, dy = e.clientY - castDrag.y;
+  if (!castDrag.started) { if (Math.hypot(dx, dy) < 8) return; castDrag.started = true; castDrag.item.classList.add("dragging"); }
+  e.preventDefault();
+  castDrag.item.style.transform = `translate(${dx}px,${dy}px)`;
+  const over = document.elementFromPoint(e.clientX, e.clientY);
+  const t = over && castOrder && over.closest(`#${castOrder.g.grid} .pimg[data-slotpos]`);
+  document.querySelectorAll(".drop-target").forEach(x => x.classList.remove("drop-target"));
+  castDrag.target = t && t !== castDrag.item ? Number(t.dataset.slotpos) : null;
+  if (castDrag.target !== null) t.classList.add("drop-target");
+}, { passive: false });
+const endCastDrag = e => {
+  if (!castDrag || (e && e.pointerId !== castDrag.id)) return;
+  const d = castDrag; castDrag = null;
+  d.item.classList.remove("dragging"); d.item.style.transform = "";
+  document.querySelectorAll(".drop-target").forEach(x => x.classList.remove("drop-target"));
+  if (!d.started) return;
+  castDragJust = true; setTimeout(() => { castDragJust = false; }, 300);
+  if (e.type === "pointerup" && d.target !== null && d.target !== d.from && castOrder) {
+    const o = castOrder.order; [o[d.from], o[d.target]] = [o[d.target], o[d.from]];
+    drawCastOrder();
+  }
+};
+document.addEventListener("pointerup", endCastDrag);
+document.addEventListener("pointercancel", endCastDrag);
+// インバウンド対応にチェックしたときだけインバウンド画像の欄を出す（外しても画像は消さない）
+function refreshInbBox() { $("castInbBox").style.display = $("castInbound").checked ? "block" : "none"; }
+$("castInbound").addEventListener("change", refreshInbBox);   // マシェリの既存onchange(条件欄)を消さない
+$("castImgGrid").onclick = $("castInbGrid").onclick = e => {
+  if (castOrder || castDragJust) return;   // 並べ替え中・ドラッグ直後は差し替えを開かない
+  const th = e.target.closest(".pimg-thumb");
+  if (th) { castImgSlot = th.dataset.suf; $("castImgFile").value = ""; $("castImgFile").click(); return; }
+  const del = e.target.closest("[data-del]");
+  if (del) deleteCastImage(del.dataset.del);
+};
+$("castImgFile").onchange = async () => {
+  const file = $("castImgFile").files[0]; if (!file) return;
+  if (!ghToken(true)) return;
+  const name = castImgName, suf = castImgSlot;
+  const th = document.querySelector(`.pimg-thumb[data-suf="${suf}"]`); if (th) th.classList.add("busy");
+  try {
+    const b64 = await resizeToJpegBase64(file, 1200, 0.88);
+    await ghPutImage(name, suf, b64, "プロフィール画像を更新: " + name + suf);
+    await renderCastImages();
+  } catch (e) {
+    alert("画像の保存に失敗しました。\n" + (e.message || e));
+    if (th) th.classList.remove("busy");
+  }
+};
+// 長い辺を maxSide 以内に縮小して JPEG の base64（ヘッダなし）にする
+function resizeToJpegBase64(file, maxSide, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+      const cv = document.createElement("canvas");
+      cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      resolve(cv.toDataURL("image/jpeg", quality).split(",")[1]);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("画像を読み込めませんでした")); };
+    img.src = url;
+  });
+}
+async function ghPutImage(name, suf, b64, message) {
+  const cur = await ghFile(name, suf);
+  const res = await fetch(`https://api.github.com/repos/${IMG_REPO}/contents/${imgPath(name, suf)}`, {
+    method: "PUT", headers: { ...ghHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ message, content: b64, branch: "main", ...(cur ? { sha: cur.sha } : {}) })
+  });
+  if (res.status === 401 || res.status === 403) { try { localStorage.removeItem(GH_TOKEN_KEY); } catch (e) {} throw new Error("トークンが無効です。もう一度お試しください。"); }
+  if (!res.ok) throw new Error("GitHub への保存エラー（" + res.status + "）");
+  imgLocal[imgKey(name, suf)] = "data:image/jpeg;base64," + b64;
+}
+async function ghDeleteImage(name, suf, message) {
+  const cur = await ghFile(name, suf);
+  if (cur) {
+    const res = await fetch(`https://api.github.com/repos/${IMG_REPO}/contents/${imgPath(name, suf)}`, {
+      method: "DELETE", headers: { ...ghHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ message, sha: cur.sha, branch: "main" })
+    });
+    if (!res.ok) throw new Error("GitHub での削除エラー（" + res.status + "）");
+  }
+  imgLocal[imgKey(name, suf)] = null;
+}
+async function deleteCastImage(suf) {
+  const label = (IMG_SLOTS.find(x => x[0] === suf) || [])[1];
+  if (!confirm(`${castImgName} の「${label}」画像を削除しますか？`)) return;
+  if (!ghToken(true)) return;
+  try { await ghDeleteImage(castImgName, suf, "プロフィール画像を削除: " + castImgName + suf); await renderCastImages(); }
+  catch (e) { alert("画像の削除に失敗しました。\n" + (e.message || e)); }
+}
+// ===== トップ画像（img/top.jpg, top2.jpg, top3.jpg …）。受付画面は番号が途切れるまで順に表示する =====
+let topImgSlot = "";
+// トップ画像の表示・非表示（非表示にした番号を受付サイトの img/top.json に保存。受付画面はその番号を飛ばす）
+let topHidden = [];
+let topBusy = false;   // 保存中は次の操作を受け付けない（操作が重なると画像が入れ替わる途中の状態を読んでしまうため）
+const topSuf = n => n === 1 ? "" : String(n);
+const topFile = n => (n === 1 ? "top" : "top" + n) + ".jpg";
+// トークンなしの端末（表示だけ）：受付サイトの img/top.json を読む
+async function loadTopCfg() {
+  try {
+    const r = await fetch(IMG_SITE + "img/top.json?t=" + Date.now(), { cache: "no-store" });
+    topHidden = r.ok ? ((await r.json()).hidden || []) : [];
+  } catch (e) { topHidden = []; }
+}
+// ---- GitHub の git データ API（トークン付き）。並べ替え・削除・表示切り替えは「どのファイル名にどの画像を割り当てるか」を
+//      1回のコミットでまとめて入れ替える。画像の中身を読み書きしないので、反映待ちの古い中身を読んでコピーになることがない ----
+async function ghJson(path, opt = {}) {
+  const res = await fetch(`https://api.github.com/repos/${IMG_REPO}` + path,
+    { ...opt, headers: { ...ghHeaders(), "Content-Type": "application/json" }, cache: "no-store" });
+  if (res.status === 401) { try { localStorage.removeItem(GH_TOKEN_KEY); } catch (e) {} throw new Error("トークンが無効です。もう一度お試しください。"); }
+  if (!res.ok) { const err = new Error("GitHub エラー（" + res.status + "）"); err.status = res.status; throw err; }
+  return res.json();
+}
+// img フォルダの最新状態（main の最新コミット時点でそろったもの）。byName: ファイル名 → 画像のSHA
+async function readImgFiles() {
+  const ref = await ghJson("/git/ref/heads/main?_t=" + Date.now());
+  const commit = await ghJson("/git/commits/" + ref.object.sha);
+  const root = await ghJson("/git/trees/" + commit.tree.sha);
+  const imgTree = root.tree.find(t => t.path === "img" && t.type === "tree");
+  const files = imgTree ? (await ghJson("/git/trees/" + imgTree.sha)).tree : [];
+  return { head: ref.object.sha, tree: commit.tree.sha, byName: Object.fromEntries(files.map(f => [f.path.normalize("NFC"), f.sha])) };
+}
+// build(今の状態) → [{ file, sha }]（sha=null は削除）を1回のコミットで保存。重なったら読み直してやり直す。新しいコミットのSHAを返す
+async function commitImgFiles(build, message) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const snap = await readImgFiles();
+    const entries = build(snap).filter(c => (snap.byName[c.file] || null) !== c.sha)
+      .map(c => ({ path: "img/" + c.file, mode: "100644", type: "blob", sha: c.sha }));
+    if (!entries.length) return snap.head;
+    const tree = await ghJson("/git/trees", { method: "POST", body: JSON.stringify({ base_tree: snap.tree, tree: entries }) });
+    const commit = await ghJson("/git/commits", { method: "POST", body: JSON.stringify({ message, tree: tree.sha, parents: [snap.head] }) });
+    try { await ghJson("/git/refs/heads/main", { method: "PATCH", body: JSON.stringify({ sha: commit.sha, force: false }) }); return commit.sha; }
+    catch (e) { if (e.status !== 422) throw e; }
+  }
+  throw new Error("ほかの保存と重なったため保存できませんでした。もう一度お試しください。");
+}
+const rawImgUrl = (commitSha, file) => `https://raw.githubusercontent.com/${IMG_REPO}/${commitSha}/img/${encodeURIComponent(file)}`;
+// 今のトップ画像
+async function readTopSnapshot() {
+  const { head, tree, byName } = await readImgFiles();
+  const blobs = [];
+  for (let n = 1; n <= 30 && byName[topFile(n)]; n++) blobs.push(byName[topFile(n)]);
+  let hidden = [];
+  if (byName["top.json"]) {
+    try { const b = await ghJson("/git/blobs/" + byName["top.json"]); hidden = JSON.parse(decodeURIComponent(escape(atob(b.content.replace(/\n/g, ""))))).hidden || []; } catch (e) {}
+  }
+  return { head, tree, blobs, hidden: hidden.filter(x => x >= 1 && x <= blobs.length) };
+}
+// mutate(今の状態) → { blobs, hidden } を1回のコミットで保存。ほかの保存と重なったら読み直してやり直す
+async function commitTop(mutate, message) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const snap = await readTopSnapshot();
+    const next = mutate(snap);
+    const entries = [];
+    for (let n = 1; n <= Math.max(snap.blobs.length, next.blobs.length); n++) {
+      const sha = next.blobs[n - 1] || null;
+      if (sha !== (snap.blobs[n - 1] || null)) entries.push({ path: "img/" + topFile(n), mode: "100644", type: "blob", sha });
+    }
+    const hid = [...new Set(next.hidden)].sort((a, b) => a - b);
+    if (hid.join() !== [...snap.hidden].sort((a, b) => a - b).join())
+      entries.push({ path: "img/top.json", mode: "100644", type: "blob", content: JSON.stringify({ hidden: hid }) });
+    if (!entries.length) return;
+    const tree = await ghJson("/git/trees", { method: "POST", body: JSON.stringify({ base_tree: snap.tree, tree: entries }) });
+    const commit = await ghJson("/git/commits", { method: "POST", body: JSON.stringify({ message, tree: tree.sha, parents: [snap.head] }) });
+    try { await ghJson("/git/refs/heads/main", { method: "PATCH", body: JSON.stringify({ sha: commit.sha, force: false }) }); return; }
+    catch (e) { if (e.status !== 422) throw e; }   // 422 = 先にほかの保存が入った → やり直す
+  }
+  throw new Error("ほかの保存と重なったため保存できませんでした。もう一度お試しください。");
+}
+// 保存系の操作を1つずつ実行する
+async function topOp(fn, failMsg) {
+  if (topBusy) return;
+  if (!ghToken(true)) return;
+  topBusy = true;
+  const grid = $("topImgGrid"); if (grid) grid.style.opacity = ".5";
+  try { await fn(); await renderTopImages(); }
+  catch (e) { alert(failMsg + "\n" + (e.message || e)); }
+  finally { topBusy = false; const g = $("topImgGrid"); if (g) g.style.opacity = ""; }
+}
+function toggleTopVisible(n) {
+  return topOp(() => commitTop(s => ({ blobs: s.blobs, hidden: s.hidden.includes(n) ? s.hidden.filter(x => x !== n) : [...s.hidden, n] }),
+    `トップ画像の${n}枚目の表示を切り替え`), "表示・非表示の保存に失敗しました。");
+}
+// ===== 並べ替え：「並びを変更」→ ドラッグ＆ドロップ（画面上だけで入れ替え）→「保存」で1回だけ保存 =====
+let topEdit = null;   // 並べ替え中 { base: 開始時の画像SHA, order: 元の番号の新しい並び, imgs, hidden }
+let topShown = { imgs: [], hidden: [], blobs: null };   // いま表示している内容
+async function startTopEdit() {
+  if (topBusy || !ghToken(true)) return;
+  topBusy = true;
+  try {
+    await renderTopImages();   // 最新の状態から始める
+    if (!topShown.blobs || topShown.imgs.length < 2) return;
+    topEdit = { base: topShown.blobs, order: topShown.imgs.map((_, i) => i + 1), imgs: topShown.imgs, hidden: topShown.hidden };
+  } finally { topBusy = false; }
+  drawTopGrid();
+}
+function cancelTopEdit() { topEdit = null; drawTopGrid(); }
+function moveTopInEdit(from, to) {   // from 番目（いまの表示位置）を to 番目へ
+  if (!topEdit) return;
+  topEdit.order.splice(to - 1, 0, topEdit.order.splice(from - 1, 1)[0]);
+  drawTopGrid();
+}
+async function saveTopEdit() {
+  if (!topEdit) return;
+  const { base, order } = topEdit;
+  if (order.every((k, i) => k === i + 1)) { cancelTopEdit(); return; }
+  await topOp(() => commitTop(s => {
+    if (s.blobs.join() !== base.join()) throw new Error("並べ替えの間にトップ画像が変更されました。もう一度「並びを変更」からやり直してください。");
+    return { blobs: order.map(k => s.blobs[k - 1]), hidden: order.map((k, i) => s.hidden.includes(k) ? i + 1 : 0).filter(Boolean) };
+  }, "トップ画像の並べ替え"), "並べ替えの保存に失敗しました。");
+  topEdit = null;
+  drawTopGrid();
+}
+// 受付画面は番号が途切れるとそれ以降を表示しないので、途中の画像を消したら後ろを前に詰める
+function deleteTopImage(suf) {
+  const k = suf === "" ? 1 : Number(suf);
+  if (topBusy || !confirm(`トップ画像の${k}枚目を削除しますか？`)) return;
+  return topOp(() => commitTop(s => ({ blobs: s.blobs.filter((_, i) => i !== k - 1), hidden: s.hidden.filter(x => x !== k).map(x => x > k ? x - 1 : x) }),
+    `トップ画像を削除（${k}枚目）`), "トップ画像の削除に失敗しました。");
+}
+async function renderTopImages() {
+  if (!$("topImgGrid")) return;
+  let imgs = null, blobs = null;
+  if (ghToken(false)) {
+    // トークンのある端末：GitHub の最新コミットから直接（受付サイトへの反映待ちの影響を受けない）
+    try {
+      const snap = await readTopSnapshot();
+      imgs = snap.blobs.map((b, i) => ({ suf: topSuf(i + 1), src: `https://raw.githubusercontent.com/${IMG_REPO}/${snap.head}/img/${topFile(i + 1)}` }));
+      topHidden = snap.hidden; blobs = snap.blobs;
+    } catch (e) { imgs = null; }
+  }
+  if (!imgs) {
+    await loadTopCfg();
+    imgs = [];
+    for (let n = 1; n <= 30; n++) {
+      const st = await imgState("top", topSuf(n));
+      if (!st.exists) break;
+      imgs.push({ suf: topSuf(n), src: st.src });
+    }
+  }
+  topShown = { imgs, hidden: topHidden, blobs };
+  if (!topEdit) drawTopGrid();
+}
+function drawTopGrid() {
+  const grid = $("topImgGrid"), bar = $("topImgBar"); if (!grid) return;
+  if (topEdit) {
+    // 並べ替え中：ドラッグで入れ替え。保存するまで受付画面には反映しない
+    bar.innerHTML = `<span style="font-size:12px;font-weight:700;color:var(--pink)">ドラッグで並べ替えて「保存」</span>
+      <button class="btn" id="topEditSave" style="padding:6px 14px;font-size:13px">保存</button>
+      <button class="btn ghost" id="topEditCancel" style="padding:6px 14px;font-size:13px">キャンセル</button>`;
+    grid.classList.add("editing");
+    grid.innerHTML = topEdit.order.map((k, i) => {
+      const off = topEdit.hidden.includes(k), f = topEdit.imgs[k - 1];
+      return `<div class="pimg" data-topidx="${i + 1}"><div class="pimg-thumb has ${off ? "off" : ""}"><img src="${esc(f.src)}" alt="" draggable="false"></div>
+        <div class="pimg-label">${i + 1}枚目${k !== i + 1 ? `<span style="color:var(--ink-soft);font-weight:500">（元${k}）</span>` : ""}</div></div>`;
+    }).join("");
+    $("topEditSave").onclick = saveTopEdit;
+    $("topEditCancel").onclick = cancelTopEdit;
+    return;
+  }
+  grid.classList.remove("editing");
+  const imgs = topShown.imgs, n = imgs.length;
+  bar.innerHTML = n >= 2 ? `<button class="btn ghost" id="topEditStart" style="padding:6px 14px;font-size:13px">並びを変更</button>` : "";
+  if (n >= 2) $("topEditStart").onclick = startTopEdit;
+  let html = imgs.map((f, i) => {
+    const off = topShown.hidden.includes(i + 1);
+    return `<div class="pimg"><div class="pimg-thumb has ${off ? "off" : ""}" data-top="${f.suf}"><img src="${esc(f.src)}" alt="" draggable="false"></div>
+      <div class="pimg-label">${i + 1}枚目</div>
+      <div class="pimg-btns"><button class="pimg-vis ${off ? "" : "on"}" data-topvis="${i + 1}">${off ? "非表示" : "表示"}</button>
+      <button class="pimg-del" data-topdel="${f.suf}">削除</button></div></div>`;
+  }).join("");
+  html += `<div class="pimg"><div class="pimg-thumb" data-top="${topSuf(n + 1)}">＋</div><div class="pimg-label">追加</div><button class="pimg-del" style="visibility:hidden">削除</button></div>`;
+  grid.innerHTML = html;
+}
+document.addEventListener("click", e => {
+  if (topDragJust) return;   // ドラッグで並べ替えた直後のクリックは無視（差し替えを開かない）
+  if (!e.target.closest("#topImgGrid")) return;
+  if (topBusy || topEdit) return;
+  const th = e.target.closest("#topImgGrid .pimg-thumb");
+  if (th) { topImgSlot = th.dataset.top; $("topImgFile").value = ""; $("topImgFile").click(); return; }
+  const del = e.target.closest("#topImgGrid [data-topdel]");
+  if (del) { deleteTopImage(del.dataset.topdel); return; }
+  const vis = e.target.closest("#topImgGrid [data-topvis]");
+  if (vis) toggleTopVisible(Number(vis.dataset.topvis));
+});
+document.addEventListener("change", async e => {
+  if (e.target.id !== "topImgFile") return;
+  const file = e.target.files[0]; if (!file) return;
+  if (topBusy || !ghToken(true)) return;
+  topBusy = true;
+  const th = document.querySelector(`#topImgGrid .pimg-thumb[data-top="${topImgSlot}"]`); if (th) th.classList.add("busy");
+  try {
+    const b64 = await resizeToJpegBase64(file, 1920, 0.88);   // 大型モニター用に大きめ
+    await ghPutImage("top", topImgSlot, b64, "トップ画像を更新: top" + topImgSlot);
+  } catch (err) {
+    alert("トップ画像の保存に失敗しました。\n" + (err.message || err));
+  }
+  topBusy = false;
+  await renderTopImages();
+});
+// ===== ドラッグ＆ドロップで並べ替え（マウス・タッチ共通）。軽いタップは今までどおり差し替え =====
+let topDrag = null, topDragJust = false;
+document.addEventListener("pointerdown", e => {
+  const item = e.target.closest("#topImgGrid .pimg[data-topidx]");
+  if (!item || !e.target.closest(".pimg-thumb") || topBusy || !topEdit) return;
+  topDrag = { item, from: Number(item.dataset.topidx), x: e.clientX, y: e.clientY, id: e.pointerId, started: false, target: null };
+});
+document.addEventListener("pointermove", e => {
+  if (!topDrag || e.pointerId !== topDrag.id) return;
+  const dx = e.clientX - topDrag.x, dy = e.clientY - topDrag.y;
+  if (!topDrag.started) { if (Math.hypot(dx, dy) < 10) return; topDrag.started = true; topDrag.item.classList.add("dragging"); }
+  e.preventDefault();
+  topDrag.item.style.transform = `translate(${dx}px,${dy}px)`;
+  const over = document.elementFromPoint(e.clientX, e.clientY);
+  const t = over && over.closest("#topImgGrid .pimg[data-topidx]");
+  document.querySelectorAll("#topImgGrid .drop-target").forEach(x => x.classList.remove("drop-target"));
+  topDrag.target = t && t !== topDrag.item ? Number(t.dataset.topidx) : null;
+  if (topDrag.target) t.classList.add("drop-target");
+}, { passive: false });
+const endTopDrag = e => {
+  if (!topDrag || (e && e.pointerId !== topDrag.id)) return;
+  const d = topDrag; topDrag = null;
+  d.item.classList.remove("dragging"); d.item.style.transform = "";
+  document.querySelectorAll("#topImgGrid .drop-target").forEach(x => x.classList.remove("drop-target"));
+  if (!d.started) return;
+  topDragJust = true; setTimeout(() => { topDragJust = false; }, 300);
+  if (e && e.type === "pointerup" && d.target && d.target !== d.from) moveTopInEdit(d.from, d.target);
+};
+document.addEventListener("pointerup", endTopDrag);
+document.addEventListener("pointercancel", endTopDrag);
+// 名前を変えたら画像のファイル名も付け替える（新しい名前の画像が既にある枠はそのまま）
+async function renameCastImages(oldName, newName) {
+  const targets = [];
+  for (const [suf] of IMG_SLOTS) if ((await imgState(oldName, suf)).exists) targets.push(suf);
+  if (!targets.length) return;
+  if (!ghToken(true)) { alert("トークンがないため、画像のファイル名は変更されませんでした。"); return; }
+  const skipped = [];
+  for (const suf of targets) {
+    try {
+      if (await ghFile(newName, suf)) { skipped.push(newName + suf); continue; }
+      const old = await ghFile(oldName, suf); if (!old) continue;
+      const msg = `プロフィール画像の名前を変更: ${oldName}${suf} → ${newName}${suf}`;
+      await ghPutImage(newName, suf, (old.content || "").replace(/\n/g, ""), msg);
+      await ghDeleteImage(oldName, suf, msg);
+    } catch (e) { skipped.push(oldName + suf); }
+  }
+  if (skipped.length) alert("次の画像は名前を変更できませんでした：\n" + skipped.join("、"));
+}
+
 
 /* ===== 13. 利用入力ダイアログ ====================================== */
 // 開始時間ドロップダウン（時：OPEN〜23、分：00 / .5）を初期化
